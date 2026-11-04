@@ -1,0 +1,6 @@
+{
+  "name": "Vampiee - UAE Offplan Luxury Real Estate Portal",
+  "description": "Premier UAE offplan real estate platform featuring a talking AI concierge, 5-USP property recommendations, agent lead qualification dashboard, developer price comparison, and 360° virtual tours.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
