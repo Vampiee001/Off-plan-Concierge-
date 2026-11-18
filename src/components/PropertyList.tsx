@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { PropertyCard } from './PropertyCard';
 import { Property } from '../types';
 import { CurrencyCode } from '../utils/formatters';
 import { LanguageCode, translations } from '../utils/translations';
-import { SlidersHorizontal, ArrowUpDown, Building, CheckCircle2 } from 'lucide-react';
+import { ArrowUpDown, Building } from 'lucide-react';
 
 interface PropertyListProps {
   properties: Property[];
@@ -19,6 +19,70 @@ interface PropertyListProps {
   onOpenViewingModal: (property?: Property) => void;
   onAskAiAboutProperty: (property: Property) => void;
 }
+
+interface RevealPropertyCardProps {
+  index: number;
+  children: React.ReactNode;
+}
+
+const RevealPropertyCard: React.FC<RevealPropertyCardProps> = ({ index, children }) => {
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const element = cardRef.current;
+    if (!element) return;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: '0px 0px -24px 0px',
+      }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const staggerDelayMs = (index % 3) * 110;
+
+  return (
+    <div
+      ref={cardRef}
+      style={{
+        transitionDelay: isVisible ? `${staggerDelayMs}ms` : '0ms',
+        transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
+      className={`h-full transition-[opacity,transform,filter] duration-700 will-change-[opacity,transform] motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0 motion-reduce:scale-100 motion-reduce:blur-0 ${
+        isVisible
+          ? 'opacity-100 translate-y-0 scale-100 blur-0'
+          : 'opacity-0 translate-y-7 scale-[0.98] blur-[2px]'
+      }`}
+    >
+      {children}
+    </div>
+  );
+};
 
 export const PropertyList: React.FC<PropertyListProps> = ({
   properties,
@@ -141,17 +205,18 @@ export const PropertyList: React.FC<PropertyListProps> = ({
       {/* Property Cards Grid */}
       {filteredProperties.length > 0 ? (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProperties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              currency={currency}
-              isSaved={savedPropertyIds.includes(property.id)}
-              onToggleSave={onToggleSave}
-              onSelectProperty={onSelectProperty}
-              onOpenViewingModal={onOpenViewingModal}
-              onAskAiAboutProperty={onAskAiAboutProperty}
-            />
+          {filteredProperties.map((property, index) => (
+            <RevealPropertyCard key={property.id} index={index}>
+              <PropertyCard
+                property={property}
+                currency={currency}
+                isSaved={savedPropertyIds.includes(property.id)}
+                onToggleSave={onToggleSave}
+                onSelectProperty={onSelectProperty}
+                onOpenViewingModal={onOpenViewingModal}
+                onAskAiAboutProperty={onAskAiAboutProperty}
+              />
+            </RevealPropertyCard>
           ))}
         </div>
       ) : (

@@ -44,7 +44,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const appreciationPercent = Math.round(((latestPrice - initialPrice) / initialPrice) * 100);
 
   return (
-    <div className="group rounded-2xl bg-[#091124] border border-slate-800 hover:border-amber-500/40 transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-amber-500/10 flex flex-col overflow-hidden">
+    <div className="group h-full rounded-2xl bg-[#091124] border border-slate-800 hover:border-amber-500/40 transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-amber-500/10 flex flex-col overflow-hidden">
       {/* Image Gallery Header */}
       <div className="relative h-64 overflow-hidden bg-slate-900">
         <img
